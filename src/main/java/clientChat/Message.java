@@ -9,7 +9,7 @@ public class Message {
 
 	public Message() {	}
 
-	public Message(String content, int age) {
+	public Message(String content) {
 		this.content = content;
 
 	}

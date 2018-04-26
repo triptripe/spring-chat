@@ -11,8 +11,8 @@ public class Reciever implements MySessionHandler.SessionListener{
     }
 
     @Override
-    public void gotMessage(Greeting greeting) {
-        System.out.println(greeting.getContent());
+    public void gotMessage(Message message) {
+        System.out.println(message.getContent());
     }
 
     @Override

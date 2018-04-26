@@ -6,7 +6,8 @@ import java.util.Scanner;
  * Created by user on 26.04.2018.
  */
 public class Sender implements MySessionHandler.SessionListener {
-    MySessionHandler handler;
+    private MySessionHandler handler;
+    private String messageToSend;
 
     @Override
     public void wasConnected(MySessionHandler handler) {
@@ -16,7 +17,7 @@ public class Sender implements MySessionHandler.SessionListener {
     }
 
     @Override
-    public void gotMessage(Greeting message) {
+    public void gotMessage(Message message) {
 
     }
 
@@ -27,10 +28,10 @@ public class Sender implements MySessionHandler.SessionListener {
 
     void sendMessage() {
         Scanner scan = new Scanner(System.in);
-        HelloMessage helloMessage = null;
+        Message message = null;
         while (handler.isConnected()) {
-            helloMessage = new HelloMessage(scan.nextLine(), -1);
-            handler.send(helloMessage);
+            message = new Message(scan.nextLine());
+            handler.send(message);
         }
     }
 }
