@@ -9,7 +9,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="chat-spring_main" />
+    <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter-web:" level="project" />
   </component>
   <component name="TestModuleProperties" production-module="chat-spring_main" />
 </module>
