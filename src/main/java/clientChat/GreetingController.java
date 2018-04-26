@@ -16,6 +16,6 @@ public class GreetingController {
     @SendTo("/topic/greetings")
     public Message gotMessage(Message message) throws Exception {
         System.out.println("Received " + message.getContent());
-        return new Message(message.getContent());
+        return message;
     }
 }
