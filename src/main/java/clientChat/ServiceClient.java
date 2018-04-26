@@ -15,7 +15,7 @@ public class ServiceClient {
         stompClient.setTaskScheduler(new ConcurrentTaskScheduler());
 
         String url = "ws://127.0.0.1:8080/hello";
-        MysessionHandler sessionHandler = new MysessionHandler(this);
+        MySessionHandler sessionHandler = new MySessionHandler();
         stompClient.connect(url, sessionHandler);
 
 //        new Scanner(System.in).nextLine(); //Don't close immediately.

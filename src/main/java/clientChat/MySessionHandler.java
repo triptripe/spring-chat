@@ -8,25 +8,32 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 @Slf4j
-public class MysessionHandler extends StompSessionHandlerAdapter {
-    private StompSession session;
-    private SessionConnectedListener listener;
+public class MySessionHandler extends StompSessionHandlerAdapter {
 
-    public MysessionHandler(SessionConnectedListener listener) {
-        this.listener = listener;
+    private StompSession session;
+    private ArrayList<SessionListener> listeners;
+
+    public MySessionHandler() {
+        listeners = new ArrayList<>();
+    }
+
+    public void addListener(SessionListener listener){
+        listeners.add(listener);
     }
 
     @Override
     public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+        this.session = session;
+
         session.subscribe("/topic/greetings", this);
-        session.send("/app/hello", new HelloMessage("Privet", 22));
-        // session.disconnect();
-        // log.info("New session: {}", );
         System.out.println("New session: " + session.getSessionId());
 
-        this.session = session;
+        for (SessionListener listener: listeners){
+            listener.wasConnected(this);
+        }
     }
 
     @Override
@@ -41,17 +48,27 @@ public class MysessionHandler extends StompSessionHandlerAdapter {
 
     @Override
     public void handleFrame(StompHeaders headers, Object payload) {
-        System.out.println("Received: " + ((Greeting) payload).getContent());
-    }
-
-    public void send() {
-        if (session != null){
-            session.send("/app/hello", new HelloMessage("Test", -20));
-//            session.disconnect();
+        for (SessionListener listener: listeners){
+            listener.gotMessage((Greeting) payload);
         }
     }
 
-    interface SessionConnectedListener{
-        void sessionConnected(MysessionHandler handler);
+    public void send(HelloMessage message) {
+        session.send("/app/hello", message);
+    }
+
+    public void disconnect(){
+        session.disconnect();
+        for (SessionListener listener: listeners){
+            listener.wasDisconnected();
+        }
+    }
+
+    interface SessionListener{
+        void wasConnected(MySessionHandler handler);
+
+        void gotMessage(Greeting message);
+
+        void wasDisconnected();
     }
 }
