@@ -16,8 +16,11 @@ public class ServiceClient {
 
         String url = "ws://127.0.0.1:8080/hello";
         MySessionHandler sessionHandler = new MySessionHandler();
+        sessionHandler.addListener(new Reciever());
+        sessionHandler.addListener(new Sender());
         stompClient.connect(url, sessionHandler);
 
+        while (true);
 //        new Scanner(System.in).nextLine(); //Don't close immediately.
     }
 }
