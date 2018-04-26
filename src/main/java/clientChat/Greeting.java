@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 public class Greeting {
     public String content;
 
-    public Greeting() {
-
-    }
+    public Greeting() {}
 
     public Greeting(String content) {
         this.content = content;

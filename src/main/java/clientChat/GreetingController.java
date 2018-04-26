@@ -11,11 +11,11 @@ public class GreetingController {
   //  private Logger log;
 
 
-    //при подписке на topic/greetings вызывает метод greeting
+    //при подписке на topic/greetings вызывает метод message
     @MessageMapping("/hello")
     @SendTo("/topic/greetings")
-    public Greeting greeting(HelloMessage message) throws Exception {
-        System.out.println("Received hello: " + message.getAge() + message.getName());
-        return new Greeting("Hello, " + message.getAge() + "!");
+    public Message gotMessage(Message message) throws Exception {
+        System.out.println("Received " + message.getContent());
+        return new Message(message.getContent());
     }
 }
