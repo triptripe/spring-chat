@@ -14,7 +14,7 @@ public class ServiceClient {
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         stompClient.setTaskScheduler(new ConcurrentTaskScheduler());
 
-        String url = "ws://127.0.0.1:8080/hello";
+        String url = "ws://192.168.180.58:8080/hello";
         MySessionHandler sessionHandler = new MySessionHandler();
         sessionHandler.addListener(new Reciever());
         sessionHandler.addListener(new Sender());
