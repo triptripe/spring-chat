@@ -53,6 +53,10 @@ public class MySessionHandler extends StompSessionHandlerAdapter {
         }
     }
 
+    public boolean isConnected(){
+        return session.isConnected();
+    }
+
     public void send(HelloMessage message) {
         session.send("/app/hello", message);
     }
