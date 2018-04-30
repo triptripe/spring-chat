@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.util.ArrayList;
 
 @Entity // This tells Hibernate to make a table out of this class
 public class User {
@@ -13,8 +14,26 @@ public class User {
     private Long id;
 
     private String name;
-
+    private String password;
     private String email;
+
+    private ArrayList<Long> eventsSub = new ArrayList<>();
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setEventsSub(ArrayList<Long> eventsSub) {
+        this.eventsSub = eventsSub;
+    }
+
+    public ArrayList<Long> getEventsSub() {
+        return eventsSub;
+    }
 
     public Long getId() {
         return id;

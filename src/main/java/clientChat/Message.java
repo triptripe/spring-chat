@@ -4,22 +4,31 @@ import lombok.Data;
 
 @Data
 public class Message {
-	private String content;
+    private String content;
+    private Long id = 3L;
 
+    public Message() {
+    }
 
-	public Message() {	}
+    public Message(String content) {
+        this.content = content;
 
-	public Message(String content) {
-		this.content = content;
+    }
 
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getContent() {
-		return content;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setContent(String content) {
-		this.content = content;
-	}
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
 
 }

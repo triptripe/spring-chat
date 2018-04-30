@@ -20,6 +20,15 @@ public class EventApp {
     private String decription;
     private String place;
     private ArrayList<String> people = new ArrayList<String>();
+    private String message = "";
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
     public Long getId() {
         return id;

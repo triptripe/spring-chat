@@ -5,12 +5,12 @@ import java.util.Scanner;
 /**
  * Created by user on 26.04.2018.
  */
-public class Sender implements MySessionHandler.SessionListener {
-    private MySessionHandler handler;
+public class Sender implements handler2.SessionListener {
+    private handler2 handler;
     private String messageToSend;
 
     @Override
-    public void wasConnected(MySessionHandler handler) {
+    public void wasConnected(handler2 handler) {
         this.handler = handler;
         System.out.println("connected");
         new Thread(this::sendMessage).start();
@@ -31,6 +31,7 @@ public class Sender implements MySessionHandler.SessionListener {
         Message message = null;
         while (handler.isConnected()) {
             message = new Message(scan.nextLine());
+            message.setId(Client.id);
             handler.send(message);
         }
     }

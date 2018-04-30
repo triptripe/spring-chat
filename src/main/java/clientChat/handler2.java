@@ -11,16 +11,16 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 @Slf4j
-public class MySessionHandler extends StompSessionHandlerAdapter {
+public class handler2 extends StompSessionHandlerAdapter {
 
     private StompSession session;
     private ArrayList<SessionListener> listeners;
 
-    public MySessionHandler() {
+    public handler2() {
         listeners = new ArrayList<>();
     }
 
-    public void addListener(SessionListener listener){
+    public void addListener(SessionListener listener) {
         listeners.add(listener);
     }
 
@@ -28,10 +28,13 @@ public class MySessionHandler extends StompSessionHandlerAdapter {
     public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
         this.session = session;
 
-        session.subscribe("/topic/greetings", this);
+
+        session.subscribe("/topic/greeting" + ServiceClient.id, this);
+        session.subscribe("/topic/greeting/eventUpdate", this);
+        // session.subscribe("/topic/greeting" + 48, this);
         System.out.println("New session: " + session.getSessionId());
 
-        for (SessionListener listener: listeners){
+        for (SessionListener listener : listeners) {
             listener.wasConnected(this);
         }
 
@@ -49,12 +52,12 @@ public class MySessionHandler extends StompSessionHandlerAdapter {
 
     @Override
     public void handleFrame(StompHeaders headers, Object payload) {
-        for (SessionListener listener: listeners){
+        for (SessionListener listener : listeners) {
             listener.gotMessage((Message) payload);
         }
     }
 
-    public boolean isConnected(){
+    public boolean isConnected() {
         return session.isConnected();
     }
 
@@ -62,15 +65,15 @@ public class MySessionHandler extends StompSessionHandlerAdapter {
         session.send("/app/hello", message);
     }
 
-    public void disconnect(){
+    public void disconnect() {
         session.disconnect();
-        for (SessionListener listener: listeners){
+        for (SessionListener listener : listeners) {
             listener.wasDisconnected();
         }
     }
 
-    interface SessionListener{
-        void wasConnected(MySessionHandler handler);
+    interface SessionListener {
+        void wasConnected(handler2 handler);
 
         void gotMessage(Message message);
 
