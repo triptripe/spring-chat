@@ -3,15 +3,12 @@ package clientChat;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Base64;
 
 @Controller
 @Slf4j
@@ -26,6 +23,8 @@ public class GreetingController {
     @MessageMapping("/hello")
     public void gotMessage(Message message) throws Exception {
         System.out.println("Received " + message.getContent());
+        System.out.println("Received Id" + message.getId());
+//        EventApp evap = eventRepository.findById(message.getId()).get();
         template.convertAndSend("/topic/greeting" + message.getId(), message);
     }
 
@@ -37,89 +36,276 @@ public class GreetingController {
     private EventsRepository eventRepository;
 
 
+    @RequestMapping(value = "/post", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    public String post(@RequestBody Event image) {
+        System.out.println("/POST request with " + image.toString());
+        // save Image to C:\\server folder
+        String path = "C:\\server\\" + image.getID() + ".png";
+        String s = Base64.getEncoder().encodeToString(image.getImage());
+        UtilBase64Image.decoder(s, path);
+        EventApp event = new EventApp();
+
+        event.setDecription(image.getDescribe());
+        event.setName(image.getTitle());
+        event.setPlace(image.getPlace());
+        event.setImage(image.getImage());
+        event.setDate(image.getDate());
+        event.setKind(image.getKind());
+        event.setTime(image.getTime());
+        for (UserApp u : userRepository.findAll()) {
+            if (u.getEmail().equals(image.getAuthor())) {
+                ArrayList<String> arr = event.getPeople();
+                arr.add(Long.toString(u.getId()));
+                event.setPeople(arr);
+                break;
+            }
+
+        }
+        event.setAuthor(image.getAuthor());
+        eventRepository.save(event);
+        template.convertAndSend("/topic/greeting/eventUpdate",
+                new Message("Message for all"));
+        // This returns a JSON or XML with the users
+        return Long.toString(event.getId());
+    }
+
     //add user
     @GetMapping(path = "/add") // Map ONLY GET Requests
     public @ResponseBody
-    Long addNewUser(@RequestParam String name
-            , @RequestParam String email, @RequestParam String password) {
+    String addNewUser(@RequestParam String name
+            , @RequestParam String email, @RequestParam String password, @RequestParam String age, @RequestParam String city) {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
 
-        User n = new User();
-        n.setName(name);
+        UserApp n = new UserApp();
+        n.setmName(name);
         n.setEmail(email);
         n.setPassword(password);
-        for (User u : userRepository.findAll()) {
+        n.setAge(age);
+        n.setCity(city);
+        for (UserApp u : userRepository.findAll()) {
             if (u.getEmail().equals(email))
-                return 0L;
+                return "0";
         }
         userRepository.save(n);
-        for (User u : userRepository.findAll()) {
+        for (UserApp u : userRepository.findAll()) {
             if (u.getEmail().equals(email))
-                return u.getId();
+                return "" + u.getId();
         }
-        return 0L;
+        return "0";
     }
 
-    @GetMapping(path = "/all")
-    public @ResponseBody
-    Iterable<User> getAllUsers() {
+    @RequestMapping(value = "/postUser", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    public String postUser(@RequestBody User image) {
+        System.out.println("/POST request with " + image.toString());
+        // save Image to C:\\server folder
+        String path = "C:\\server\\" + image.getEmail() + ".png";
+        String s = Base64.getEncoder().encodeToString(image.getImage());
+        UtilBase64Image.decoder(s, path);
+        UserApp user = new UserApp();
+        user.setAge(image.getAge());
+        user.setCity(image.getCity());
+        user.setEmail(image.getEmail());
+        user.setmName(image.getName());
+        user.setPassword(image.getPassword());
+        user.setImage(image.getImage());
+        System.out.println("1");
+        userRepository.save(user);
+        System.out.println(user.getId());
         // This returns a JSON or XML with the users
-        return userRepository.findAll();
+        return Long.toString(user.getId());
     }
 
-    @GetMapping(path = "/id")
+
+    @RequestMapping(value = "/postUserUpdate", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    public void postUserUpdate(@RequestBody User image) {
+        for (UserApp a : userRepository.findAll()) {
+            if (a.getEmail().equals(image.getEmail())) {
+                a.setImage(image.getImage());
+                a.setmName(image.getName());
+                a.setCity(image.getCity());
+                a.setAge(image.getAge());
+                userRepository.save(a);
+                System.out.println("/POST request with " + image.toString());
+                // save Image to C:\\server folder
+                String path = "C:\\server\\" + image.getEmail() + ".png";
+                String s = Base64.getEncoder().encodeToString(image.getImage());
+                UtilBase64Image.decoder(s, path);
+                return;
+            }
+        }
+
+
+    }
+
+
+    @GetMapping(path = "/updatePerson")
     public @ResponseBody
-    Optional<User> getByid() {
+    void updatePerson(@RequestParam String email, @RequestParam String name, @RequestParam String age, @RequestParam String city) {
         // This returns a JSON or XML with the users
-        return userRepository.findById(2L);
+        for (UserApp u : userRepository.findAll()) {
+            if (u.getEmail().equals(email)) {
+                u.setCity(city);
+                u.setAge(age);
+                u.setmName(name);
+                userRepository.save(u);
+            }
+        }
 
     }
 
-    //create event
-    @GetMapping(path = "/createEvent")
+
+    @GetMapping(path = "/loginUser")
     public @ResponseBody
-    String CreateEvent(@RequestParam Integer maxPeople, @RequestParam String name
-            , @RequestParam String description, @RequestParam String place) {
-
-        EventApp event = new EventApp();
-        event.setMaxPeople(maxPeople);
-        event.setDecription(description);
-        event.setName(name);
-        event.setPlace(place);
-        eventRepository.save(event);
-       /* for (User u : userRepository.findAll())
-            template.convertAndSend("/topic/greeting" + u.getId(),
-                    new Message("Message for" + u.getId()));*/
-
-        template.convertAndSend("/topic/greeting/eventUpdate",
-                new Message("Message for all"));
-
+    UserApp loginUser(@RequestParam String email, @RequestParam String password) {
         // This returns a JSON or XML with the users
-        return "eventCreated";
-
+        for (UserApp u : userRepository.findAll()) {
+            if (u.getEmail().equals(email) && u.getPassword().equals(password))
+                return u;
+        }
+        return null;
     }
 
 
-    //добавить человека к событию
-    @GetMapping(path = "/addToEvent")
+    @GetMapping(path = "/AllEvents")
     public @ResponseBody
-    String addPerson() {
-
-        eventRepository.findById(1L).get().addPeople("Vadim");
-        eventRepository.findById(1L).get().addPeople("Ivan");
+    ListEvents eventAllReturn() {
         // This returns a JSON or XML with the users
-        return eventRepository.findById(1L).get().getPeople().get(0);
 
+        ArrayList<Event> result = new ArrayList<>();
+        for (EventApp u : eventRepository.findAll()) {
+            Event event = new Event(Long.toString(u.getId()), u.getName(), u.getDecription(), u.getAuthor());
+            event.setImage(u.getImage());
+            event.setDate(u.getDate());
+            event.setKind(u.getKind());
+            event.setTime(u.getTime());
+            event.setPlace("");
+            result.add(event);
+        }
+        ListEvents eal = new ListEvents();
+        eal.setListEvent(result);
+        return eal;
     }
 
 
-    @GetMapping(path = "/idEvent")
+    @GetMapping(path = "/AllEventsOfUser")
     public @ResponseBody
-    String getMessagesInEvent(@RequestParam Long id) {
+    ListEvents allEventsOfUser(@RequestParam String email) {
         // This returns a JSON or XML with the users
-        return eventRepository.findById(id).get().getMessage();
+
+        ArrayList<Event> result = new ArrayList<>();
+        for (UserApp u : userRepository.findAll()) {
+            if (u.getEmail().equals(email)) {
+                ArrayList<Long> arr = u.getEventsSub();
+                for (int i = 0; i < arr.size(); i++) {
+                    System.out.println(arr.get(i));
+                    EventApp ea = eventRepository.findById(arr.get(i)).get();
+                    Event curr = new Event(Long.toString(ea.getId()), ea.getName(), ea.getDecription(), ea.getName());
+                    result.add(curr);
+                    //  System.out.println(result.size());
+                }
+                ListEvents eal = new ListEvents();
+                eal.setListEvent(result);
+                return eal;
+            }
+        }
+        return null;
     }
 
+    //Добавить человеку событие в subscribers
+    @GetMapping(path = "/addEventToUser")
+    public @ResponseBody
+    void addEventToUser(@RequestParam String email, @RequestParam String id) {
+
+        Long Id = Long.valueOf(id);
+        for (UserApp u : userRepository.findAll()) {
+            if (u.getEmail().equals(email)) {
+                ArrayList<Long> arr = u.getEventsSub();
+                arr.add(Id);
+                u.setEventsSub(arr);
+                userRepository.save(u);
+                //    System.out.println(arr.size());
+            }
+        }
+    }
+
+
+    //Добавить событию человека в subscribers
+    @GetMapping(path = "/addUserToEvent")
+    public @ResponseBody
+    void addUserToEvent(@RequestParam String email, @RequestParam String id) {
+
+        Long Id = Long.valueOf(id);
+        EventApp u = eventRepository.findById(Id).get();
+
+        ArrayList<String> arr = u.getPeople();
+        for (UserApp user : userRepository.findAll())
+            if (user.getEmail().equals(email)) {
+                arr.add(Long.toString(user.getId()));
+                u.setPeople(arr);
+                eventRepository.save(u);
+                System.out.println(arr.size());
+                return;
+            }
+    }
+
+
+    @GetMapping(path = "/findEventById")
+    public @ResponseBody
+    Event findEventById(@RequestParam String id) {
+
+        Long Id = Long.valueOf(id);
+        Event result;
+        EventApp evapp = eventRepository.findById(Id).get();
+        result = new Event(id, evapp.getName(), evapp.getDecription(), evapp.getAuthor());
+        result.setImage(evapp.getImage());
+
+        result.setPlace(evapp.getPlace());
+        return result;
+    }
+
+
+    @GetMapping(path = "/deleteById")
+    public @ResponseBody
+    void deleteById(@RequestParam String id) {
+        Long Id = Long.valueOf(id);
+        EventApp event = eventRepository.findById(Id).get();
+        ArrayList<String> arr = event.getPeople();
+        System.out.println(arr.size());
+        ArrayList<Long> idUsers = new ArrayList<>();
+        for (int i = 0; i < arr.size(); i++) {
+            idUsers.add(Long.valueOf(arr.get(i)));
+        }
+        System.out.println(idUsers.size());
+        for (int i = 0; i < idUsers.size(); i++) {
+            System.out.println(idUsers.get(i));
+            UserApp u = userRepository.findById(idUsers.get(i)).get();
+            ArrayList<Long> arrEv = u.getEventsSub();
+            System.out.println(arrEv.size());
+            ArrayList<Long> newList = new ArrayList<>();
+            for (int j = 0; j < arrEv.size(); j++) {
+                if (!arrEv.get(i).equals(Id)) {
+                    newList.add(arrEv.get(i));
+                }
+
+            }
+
+
+            u.setEventsSub(newList);
+            userRepository.save(u);
+        }
+        eventRepository.deleteById(Id);
+    }
+
+
+    // события пользовтеля
+    // TODO
+    // хранение картинки
+    // getInformationAboutEvents(String email) return EventApp;
+    // Все сообщения по Id события
+    // AddMessage
 
 }
