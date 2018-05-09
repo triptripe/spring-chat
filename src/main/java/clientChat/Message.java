@@ -5,7 +5,25 @@ import lombok.Data;
 @Data
 public class Message {
     private String content;
-    private Long id = 3L;
+    private Long id;
+    private String emailSender;
+    /*private String check = "command ";
+
+    public String getCheck() {
+        return check;
+    }
+
+    public void setCheck(String check) {
+        this.check = check;
+    }*/
+
+    public String getEmailSender() {
+        return emailSender;
+    }
+
+    public void setEmailSender(String idSender) {
+        this.emailSender = idSender;
+    }
 
     public Message() {
     }

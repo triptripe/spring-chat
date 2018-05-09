@@ -14,20 +14,70 @@ public class EventApp {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private Integer maxPeople;
-    private Integer currentPeople = 1;
     private String name;
     private String decription;
-    private String place;
-    private ArrayList<String> people = new ArrayList<String>();
-    private String message = "";
+    private String author;
+    private byte[] image;
 
-    public String getMessage() {
+    private String date;
+    private String kind;
+    private String time;
+
+    private String place;
+    private ArrayList<String> people = new ArrayList<>();
+    private ArrayList<Dialogue> message = new ArrayList<>();
+
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public void setKind(String kind) {
+        this.kind = kind;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public String getKind() {
+        return kind;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setMessage(ArrayList<Dialogue> message) {
+        this.message = message;
+    }
+
+    public ArrayList<Dialogue> getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setPeople(ArrayList<String> people) {
+        this.people = people;
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 
     public Long getId() {
@@ -38,9 +88,6 @@ public class EventApp {
         this.id = id;
     }
 
-    public void setMaxPeople(Integer maxPeople) {
-        this.maxPeople = maxPeople;
-    }
 
     public String getName() {
         return name;
@@ -66,9 +113,6 @@ public class EventApp {
         this.place = place;
     }
 
-    public void setCurrentPeople(Integer currentPeople) {
-        this.currentPeople = currentPeople;
-    }
 
     public void setDecription(String decription) {
         this.decription = decription;

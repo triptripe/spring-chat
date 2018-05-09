@@ -7,17 +7,24 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
+import java.net.Socket;
 import java.util.ArrayList;
 
 @Slf4j
 public class handler2 extends StompSessionHandlerAdapter {
-
+    private Long testId;
     private StompSession session;
     private ArrayList<SessionListener> listeners;
+    private Socket socket;
 
-    public handler2() {
+    public handler2(long testId, Socket socket) {
         listeners = new ArrayList<>();
+        this.testId = testId;
+        this.socket = socket;
     }
 
     public void addListener(SessionListener listener) {
@@ -28,9 +35,33 @@ public class handler2 extends StompSessionHandlerAdapter {
     public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
         this.session = session;
 
+//заглушка на в
+        System.out.println("Подписался на " + testId);
+        session.subscribe("/topic/greeting" + testId, this);
+        session.subscribe("/topic/greeting/eventUpdate", new StompSessionHandlerAdapter() {
+            @Override
+            public void handleException(StompSession session, StompCommand command, StompHeaders headers, byte[] payload, Throwable exception) {
+                exception.printStackTrace();
+            }
 
-        session.subscribe("/topic/greeting" + ServiceClient.id, this);
-        session.subscribe("/topic/greeting/eventUpdate", this);
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return Message.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                try {
+                    OutputStream sout = socket.getOutputStream();
+                    DataOutputStream out = new DataOutputStream(sout);
+                    out.writeUTF("Пацаны обновились");
+                    out.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Commands.update();
+            }
+        });
         // session.subscribe("/topic/greeting" + 48, this);
         System.out.println("New session: " + session.getSessionId());
 
@@ -53,7 +84,11 @@ public class handler2 extends StompSessionHandlerAdapter {
     @Override
     public void handleFrame(StompHeaders headers, Object payload) {
         for (SessionListener listener : listeners) {
-            listener.gotMessage((Message) payload);
+            try {
+                listener.gotMessage((Message) payload);
+            } catch (Exception e) {
+
+            }
         }
     }
 

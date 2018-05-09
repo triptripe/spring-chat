@@ -24,7 +24,17 @@ public class GreetingController {
     public void gotMessage(Message message) throws Exception {
         System.out.println("Received " + message.getContent());
         System.out.println("Received Id" + message.getId());
-//        EventApp evap = eventRepository.findById(message.getId()).get();
+        System.out.println("Received Email " + message.getEmailSender());
+        EventApp evap = eventRepository.findById(message.getId()).get();
+        Dialogue dialogue = new Dialogue();
+        dialogue.setFrom(message.getEmailSender());
+        dialogue.setMessage(message.getContent());
+        ArrayList<Dialogue> list = evap.getMessage();
+        if (list == null)
+            list = new ArrayList<>();
+        list.add(dialogue);
+        evap.setMessage(list);
+        eventRepository.save(evap);
         template.convertAndSend("/topic/greeting" + message.getId(), message);
     }
 
@@ -53,17 +63,23 @@ public class GreetingController {
         event.setDate(image.getDate());
         event.setKind(image.getKind());
         event.setTime(image.getTime());
+        ArrayList<Long> arrU = null;
+        UserApp cur = null;
         for (UserApp u : userRepository.findAll()) {
             if (u.getEmail().equals(image.getAuthor())) {
                 ArrayList<String> arr = event.getPeople();
                 arr.add(Long.toString(u.getId()));
                 event.setPeople(arr);
+                arrU = u.getEventsSub();
+                cur = u;
                 break;
             }
-
         }
         event.setAuthor(image.getAuthor());
         eventRepository.save(event);
+        arrU.add(event.getId());
+        cur.setEventsSub(arrU);
+        userRepository.save(cur);
         template.convertAndSend("/topic/greeting/eventUpdate",
                 new Message("Message for all"));
         // This returns a JSON or XML with the users
@@ -111,9 +127,7 @@ public class GreetingController {
         user.setmName(image.getName());
         user.setPassword(image.getPassword());
         user.setImage(image.getImage());
-        System.out.println("1");
         userRepository.save(user);
-        System.out.println(user.getId());
         // This returns a JSON or XML with the users
         return Long.toString(user.getId());
     }
@@ -158,13 +172,34 @@ public class GreetingController {
     }
 
 
+    @GetMapping(path = "/getMessages")
+    public @ResponseBody
+    DialogueArray getMessages(@RequestParam String Id) {
+        // This returns a JSON or XML with the users
+        Long id = Long.valueOf(Id);
+        EventApp event = eventRepository.findById(id).get();
+        DialogueArray result = new DialogueArray();
+        result.setMessages(event.getMessage());
+        return result;
+    }
+
+
     @GetMapping(path = "/loginUser")
     public @ResponseBody
-    UserApp loginUser(@RequestParam String email, @RequestParam String password) {
+    User loginUser(@RequestParam String email, @RequestParam String password) {
         // This returns a JSON or XML with the users
         for (UserApp u : userRepository.findAll()) {
-            if (u.getEmail().equals(email) && u.getPassword().equals(password))
-                return u;
+            if (u.getEmail().equals(email) && u.getPassword().equals(password)) {
+                User result = new User();
+                result.setName(u.getmName());
+                result.setAge(u.getAge());
+                result.setCity(u.getCity());
+                result.setPassword(u.getPassword());
+                result.setEmail(u.getEmail());
+                result.setId(Long.toString(u.getId()));
+                result.setImage(u.getImage());
+                return result;
+            }
         }
         return null;
     }
@@ -247,7 +282,6 @@ public class GreetingController {
                 arr.add(Long.toString(user.getId()));
                 u.setPeople(arr);
                 eventRepository.save(u);
-                System.out.println(arr.size());
                 return;
             }
     }
@@ -260,6 +294,8 @@ public class GreetingController {
         Long Id = Long.valueOf(id);
         Event result;
         EventApp evapp = eventRepository.findById(Id).get();
+        System.out.println(evapp.getPeople().get(0));
+        System.out.println(evapp.getPeople().get(1));
         result = new Event(id, evapp.getName(), evapp.getDecription(), evapp.getAuthor());
         result.setImage(evapp.getImage());
 
@@ -271,29 +307,25 @@ public class GreetingController {
     @GetMapping(path = "/deleteById")
     public @ResponseBody
     void deleteById(@RequestParam String id) {
+        System.out.println("start");
         Long Id = Long.valueOf(id);
         EventApp event = eventRepository.findById(Id).get();
         ArrayList<String> arr = event.getPeople();
-        System.out.println(arr.size());
         ArrayList<Long> idUsers = new ArrayList<>();
         for (int i = 0; i < arr.size(); i++) {
             idUsers.add(Long.valueOf(arr.get(i)));
         }
-        System.out.println(idUsers.size());
         for (int i = 0; i < idUsers.size(); i++) {
-            System.out.println(idUsers.get(i));
             UserApp u = userRepository.findById(idUsers.get(i)).get();
             ArrayList<Long> arrEv = u.getEventsSub();
-            System.out.println(arrEv.size());
             ArrayList<Long> newList = new ArrayList<>();
             for (int j = 0; j < arrEv.size(); j++) {
-                if (!arrEv.get(i).equals(Id)) {
-                    newList.add(arrEv.get(i));
+                System.out.println(arrEv.get(j));
+                if (!arrEv.get(j).equals(Id)) {
+                    newList.add(arrEv.get(j));
                 }
 
             }
-
-
             u.setEventsSub(newList);
             userRepository.save(u);
         }
