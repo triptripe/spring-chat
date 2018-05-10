@@ -6,6 +6,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import sun.misc.resources.Messages_es;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -26,12 +27,13 @@ public class GreetingController {
         System.out.println("Received Id" + message.getId());
         System.out.println("Received Email " + message.getEmailSender());
         EventApp evap = eventRepository.findById(message.getId()).get();
-        Message dialogue = new Message();
-        dialogue.setFrom(message.getEmailSender());
-        dialogue.setMessage(message.getContent());
-        ArrayList<Message> list = evap.getMessage();
+
+        ArrayList<String> list = evap.getMessage();
         if (list == null)
             list = new ArrayList<>();
+        String dialogue;
+        dialogue = message.getEmailSender();
+        dialogue += " " + message.getContent();
         list.add(dialogue);
         evap.setMessage(list);
         eventRepository.save(evap);
@@ -115,6 +117,7 @@ public class GreetingController {
     @RequestMapping(value = "/postUser", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     public String postUser(@RequestBody User image) {
+        // for(UserApp a:userRepository.findAll()
         System.out.println("/POST request with " + image.toString());
         // save Image to C:\\server folder
         String path = "C:\\server\\" + image.getEmail() + ".png";
@@ -178,8 +181,21 @@ public class GreetingController {
         // This returns a JSON or XML with the users
         Long id = Long.valueOf(Id);
         EventApp event = eventRepository.findById(id).get();
+        ArrayList<String> list = event.getMessage();
         MessageArray result = new MessageArray();
-        result.setMessages(event.getMessage());
+        if (list == null)
+            return result;
+        ArrayList<Message> answer = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            Message message = new Message();
+            String email = list.get(i).split(" ")[0];
+            String content = list.get(i).substring(email.length() + 1);
+            message.setFrom(email);
+            message.setMessage(content);
+            answer.add(message);
+        }
+
+        result.setMessages(answer);
         return result;
     }
 

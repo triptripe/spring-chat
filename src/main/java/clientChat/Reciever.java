@@ -29,7 +29,7 @@ public class Reciever implements handler2.SessionListener {
             out.writeUTF(message.getEmailSender() + " " + message.getContent());
             out.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
         System.out.println(message.getContent());
