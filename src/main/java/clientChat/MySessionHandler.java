@@ -44,13 +44,13 @@ public class MySessionHandler extends StompSessionHandlerAdapter {
 
     @Override
     public Type getPayloadType(StompHeaders headers) {
-        return Message.class;
+        return MessageApp.class;
     }
 
     @Override
     public void handleFrame(StompHeaders headers, Object payload) {
         for (SessionListener listener: listeners){
-            listener.gotMessage((Message) payload);
+            listener.gotMessage((MessageApp) payload);
         }
     }
 
@@ -58,7 +58,7 @@ public class MySessionHandler extends StompSessionHandlerAdapter {
         return session.isConnected();
     }
 
-    public void send(Message message) {
+    public void send(MessageApp message) {
         session.send("/app/hello", message);
     }
 
@@ -72,7 +72,7 @@ public class MySessionHandler extends StompSessionHandlerAdapter {
     interface SessionListener{
         void wasConnected(MySessionHandler handler);
 
-        void gotMessage(Message message);
+        void gotMessage(MessageApp message);
 
         void wasDisconnected();
     }

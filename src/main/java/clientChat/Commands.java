@@ -20,16 +20,23 @@ public class Commands {
     static String address = "192.168.1.61"; // это IP-адрес компьютера, где исполняется наша серверная программа.
 
 
-    public static UserApp loginUser(String email, String password) {
+    public static User loginUser(String email, String password) {
 
         String url = "http://" + IP + "/loginUser?email=" + email +
                 "&password=" + password;
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-        UserApp user = restTemplate.getForObject(url, UserApp.class);
+        User user = restTemplate.getForObject(url, User.class);
         return user;
     }
 
+    public static MessageArray getMessages(String Id){
+        String url = "http://" + IP + "/getMessages?Id=" + Id;
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        MessageArray messages = restTemplate.getForObject(url, MessageArray.class);
+        return messages;
+    }
 
     public static void updatePerson(String name, String email, String age, String city, String password, byte[] arr) {
 

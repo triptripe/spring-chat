@@ -4,9 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Scanner;
 
 /**
  * Created by user on 26.04.2018.
@@ -31,7 +29,7 @@ public class Sender implements handler2.SessionListener {
     }
 
     @Override
-    public void gotMessage(Message message) {
+    public void gotMessage(MessageApp message) {
 
     }
 
@@ -55,12 +53,12 @@ public class Sender implements handler2.SessionListener {
             out.writeUTF("success");
             out.flush();
             String line = null;
-            Message message = null;
+            MessageApp message = null;
             while (handler.isConnected()) {
                 line = in.readUTF(); // ожидаем пока клиент пришлет строку текста.
                 //message.setIdSender(Long.valueOf(line.split(" ")[0]));
                 String email = line.split(" ")[0];
-                message = new Message(line.substring(email.length() + 1));
+                message = new MessageApp(line.substring(email.length() + 1));
                 message.setId(subscribeID);
                 message.setEmailSender(email);
                 //message.setCheck("chat ");

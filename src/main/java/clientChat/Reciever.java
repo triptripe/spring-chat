@@ -1,6 +1,5 @@
 package clientChat;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,7 +22,7 @@ public class Reciever implements handler2.SessionListener {
     }
 
     @Override
-    public void gotMessage(Message message) {
+    public void gotMessage(MessageApp message) {
         try {
             OutputStream sout = socket.getOutputStream();
             DataOutputStream out = new DataOutputStream(sout);

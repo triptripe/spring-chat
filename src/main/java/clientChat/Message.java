@@ -1,52 +1,31 @@
 package clientChat;
 
-import lombok.Data;
 
-@Data
+/**
+ * Created by user on 27.04.2018.
+ */
+
 public class Message {
-    private String content;
-    private Long id;
-    private String emailSender;
-    /*private String check = "command ";
 
-    public String getCheck() {
-        return check;
+    private String from;
+    private String message;
+
+    Message() {
     }
 
-    public void setCheck(String check) {
-        this.check = check;
-    }*/
-
-    public String getEmailSender() {
-        return emailSender;
+    public String getFrom() {
+        return from;
     }
 
-    public void setEmailSender(String idSender) {
-        this.emailSender = idSender;
+    public void setFrom(String from) {
+        this.from = from;
     }
 
-    public Message() {
+    public String getMessage() {
+        return message;
     }
 
-    public Message(String content) {
-        this.content = content;
-
+    public void setMessage(String message) {
+        this.message = message;
     }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
 }

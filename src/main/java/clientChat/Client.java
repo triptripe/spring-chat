@@ -18,8 +18,7 @@ public class Client {
 
     public static void main(String[] args) {
         byte[] b = {'1'};
-    Commands.makeConnection();
-
-
+        Commands.makeConnection();
+    //    System.out.println(Commands.getMessages("43").getMessages().size());
     }
 }

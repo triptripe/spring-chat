@@ -25,7 +25,7 @@ public class EventApp {
 
     private String place;
     private ArrayList<String> people = new ArrayList<>();
-    private ArrayList<Dialogue> message = new ArrayList<>();
+    private ArrayList<Message> message = new ArrayList<>();
 
 
     public String getAuthor() {
@@ -60,11 +60,11 @@ public class EventApp {
         return time;
     }
 
-    public void setMessage(ArrayList<Dialogue> message) {
+    public void setMessage(ArrayList<Message> message) {
         this.message = message;
     }
 
-    public ArrayList<Dialogue> getMessage() {
+    public ArrayList<Message> getMessage() {
         return message;
     }
 

@@ -21,15 +21,15 @@ public class GreetingController {
 
     //при подписке на topic/greetings вызывает метод message
     @MessageMapping("/hello")
-    public void gotMessage(Message message) throws Exception {
+    public void gotMessage(MessageApp message) throws Exception {
         System.out.println("Received " + message.getContent());
         System.out.println("Received Id" + message.getId());
         System.out.println("Received Email " + message.getEmailSender());
         EventApp evap = eventRepository.findById(message.getId()).get();
-        Dialogue dialogue = new Dialogue();
+        Message dialogue = new Message();
         dialogue.setFrom(message.getEmailSender());
         dialogue.setMessage(message.getContent());
-        ArrayList<Dialogue> list = evap.getMessage();
+        ArrayList<Message> list = evap.getMessage();
         if (list == null)
             list = new ArrayList<>();
         list.add(dialogue);
@@ -81,7 +81,7 @@ public class GreetingController {
         cur.setEventsSub(arrU);
         userRepository.save(cur);
         template.convertAndSend("/topic/greeting/eventUpdate",
-                new Message("Message for all"));
+                new MessageApp("MessageApp for all"));
         // This returns a JSON or XML with the users
         return Long.toString(event.getId());
     }
@@ -174,11 +174,11 @@ public class GreetingController {
 
     @GetMapping(path = "/getMessages")
     public @ResponseBody
-    DialogueArray getMessages(@RequestParam String Id) {
+    MessageArray getMessages(@RequestParam String Id) {
         // This returns a JSON or XML with the users
         Long id = Long.valueOf(Id);
         EventApp event = eventRepository.findById(id).get();
-        DialogueArray result = new DialogueArray();
+        MessageArray result = new MessageArray();
         result.setMessages(event.getMessage());
         return result;
     }
@@ -294,8 +294,6 @@ public class GreetingController {
         Long Id = Long.valueOf(id);
         Event result;
         EventApp evapp = eventRepository.findById(Id).get();
-        System.out.println(evapp.getPeople().get(0));
-        System.out.println(evapp.getPeople().get(1));
         result = new Event(id, evapp.getName(), evapp.getDecription(), evapp.getAuthor());
         result.setImage(evapp.getImage());
 
@@ -340,4 +338,5 @@ public class GreetingController {
     // Все сообщения по Id события
     // AddMessage
 
+    //получение пользователя по почте
 }
