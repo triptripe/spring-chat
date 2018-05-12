@@ -29,12 +29,12 @@ public class Proxy {
                     WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
                     stompClient.setMessageConverter(new MappingJackson2MessageConverter());
                     stompClient.setTaskScheduler(new ConcurrentTaskScheduler());
-                    String urlChat = "ws://192.168.1.61:8008/hello";
+                    String urlChat = "ws://192.168.43.69:8008/hello";
                     InputStream sin = null;
                     try {
                         sin = socket.getInputStream();
                     } catch (IOException e) {
-
+                        e.printStackTrace();
                     }
 
 

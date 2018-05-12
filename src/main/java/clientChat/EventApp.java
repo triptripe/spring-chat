@@ -23,13 +23,39 @@ public class EventApp {
     private String kind;
     private String time;
 
-    private String place;
+    private ArrayThings things;
+    private String position;
     private ArrayList<String> people = new ArrayList<>();
     private ArrayList<String> message = new ArrayList<>();
+    private String address;
+    private ArrayThings arrayThings;
 
+    public ArrayThings getArrayThings() {
+        return arrayThings;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setArrayThings(ArrayThings arrayThings) {
+        this.arrayThings = arrayThings;
+    }
 
     public String getAuthor() {
         return author;
+    }
+
+    public ArrayThings getThings() {
+        return things;
+    }
+
+    public void setThings(ArrayThings things) {
+        this.things = things;
     }
 
     public void setAuthor(String author) {
@@ -97,8 +123,8 @@ public class EventApp {
         return decription;
     }
 
-    public String getPlace() {
-        return place;
+    public String getPosition() {
+        return position;
     }
 
     public ArrayList<String> getPeople() {
@@ -109,8 +135,8 @@ public class EventApp {
         this.name = name;
     }
 
-    public void setPlace(String place) {
-        this.place = place;
+    public void setPosition(String position) {
+        this.position = position;
     }
 
 

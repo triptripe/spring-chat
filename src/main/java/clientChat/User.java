@@ -1,9 +1,11 @@
 package clientChat;
 
+import java.io.Serializable;
+
 /**
  * Created by user on 09.05.2018.
  */
-public class User {
+public class User implements Serializable{
 
     private String mId;
     private String mName;

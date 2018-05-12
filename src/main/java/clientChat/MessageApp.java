@@ -7,7 +7,15 @@ public class MessageApp {
     private String content;
     private Long id;
     private String emailSender;
+    private Long date;
 
+    public Long getDate() {
+        return date;
+    }
+
+    public void setDate(Long date) {
+        this.date = date;
+    }
 
     public String getEmailSender() {
         return emailSender;

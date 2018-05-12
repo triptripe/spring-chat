@@ -6,7 +6,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import sun.misc.resources.Messages_es;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -26,13 +25,14 @@ public class GreetingController {
         System.out.println("Received " + message.getContent());
         System.out.println("Received Id" + message.getId());
         System.out.println("Received Email " + message.getEmailSender());
+        System.out.println("Date " + message.getDate());
         EventApp evap = eventRepository.findById(message.getId()).get();
 
         ArrayList<String> list = evap.getMessage();
         if (list == null)
             list = new ArrayList<>();
         String dialogue;
-        dialogue = message.getEmailSender();
+        dialogue = message.getEmailSender() + " " + message.getDate();
         dialogue += " " + message.getContent();
         list.add(dialogue);
         evap.setMessage(list);
@@ -46,7 +46,8 @@ public class GreetingController {
     private UserRepository userRepository;
     @Autowired
     private EventsRepository eventRepository;
-
+    @Autowired
+    private TestRepository testRepository;
 
     @RequestMapping(value = "/post", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
@@ -60,11 +61,13 @@ public class GreetingController {
 
         event.setDecription(image.getDescribe());
         event.setName(image.getTitle());
-        event.setPlace(image.getPlace());
+        event.setPosition(image.getPosition());
         event.setImage(image.getImage());
         event.setDate(image.getDate());
         event.setKind(image.getKind());
         event.setTime(image.getTime());
+        event.setAddress(image.getAddress());
+        event.setArrayThings(image.getArrayThings());
         ArrayList<Long> arrU = null;
         UserApp cur = null;
         for (UserApp u : userRepository.findAll()) {
@@ -114,6 +117,22 @@ public class GreetingController {
         return "0";
     }
 
+
+    public String MD5(String md5) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+            byte[] array = md.digest(md5.getBytes());
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < array.length; ++i) {
+                sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1, 3));
+            }
+            return sb.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+        }
+        return null;
+    }
+
+
     @RequestMapping(value = "/postUser", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     public String postUser(@RequestBody User image) {
@@ -128,7 +147,7 @@ public class GreetingController {
         user.setCity(image.getCity());
         user.setEmail(image.getEmail());
         user.setmName(image.getName());
-        user.setPassword(image.getPassword());
+        user.setPassword(MD5(image.getPassword()));
         user.setImage(image.getImage());
         userRepository.save(user);
         // This returns a JSON or XML with the users
@@ -175,6 +194,23 @@ public class GreetingController {
     }
 
 
+    //Id title description place
+    @GetMapping(path = "/updateEvent")
+    public @ResponseBody
+    void updateEvent(@RequestParam String Id, @RequestParam String title, @RequestParam String description, @RequestParam String place) {
+        // This returns a JSON or XML with the users
+        for (EventApp u : eventRepository.findAll()) {
+            if (u.getId().equals(Long.valueOf(Id))) {
+                u.setPosition(place);
+                u.setName(title);
+                u.setDecription(description);
+                eventRepository.save(u);
+                return;
+            }
+        }
+
+    }
+
     @GetMapping(path = "/getMessages")
     public @ResponseBody
     MessageArray getMessages(@RequestParam String Id) {
@@ -189,9 +225,11 @@ public class GreetingController {
         for (int i = 0; i < list.size(); i++) {
             Message message = new Message();
             String email = list.get(i).split(" ")[0];
-            String content = list.get(i).substring(email.length() + 1);
+            String time = list.get(i).split(" ")[1];
+            String content = list.get(i).substring(email.length() + time.length() + 2);
             message.setFrom(email);
             message.setMessage(content);
+            message.setDate(Long.valueOf(time));
             answer.add(message);
         }
 
@@ -205,7 +243,7 @@ public class GreetingController {
     User loginUser(@RequestParam String email, @RequestParam String password) {
         // This returns a JSON or XML with the users
         for (UserApp u : userRepository.findAll()) {
-            if (u.getEmail().equals(email) && u.getPassword().equals(password)) {
+            if (u.getEmail().equals(email) && (MD5(password).equals(u.getPassword()))) {
                 User result = new User();
                 result.setName(u.getmName());
                 result.setAge(u.getAge());
@@ -233,7 +271,9 @@ public class GreetingController {
             event.setDate(u.getDate());
             event.setKind(u.getKind());
             event.setTime(u.getTime());
-            event.setPlace("");
+            event.setPosition(u.getPosition());
+            event.setAddress(u.getAddress());
+            event.setArrayThings(u.getArrayThings());
             result.add(event);
         }
         ListEvents eal = new ListEvents();
@@ -254,7 +294,14 @@ public class GreetingController {
                 for (int i = 0; i < arr.size(); i++) {
                     System.out.println(arr.get(i));
                     EventApp ea = eventRepository.findById(arr.get(i)).get();
-                    Event curr = new Event(Long.toString(ea.getId()), ea.getName(), ea.getDecription(), ea.getName());
+                    Event curr = new Event(Long.toString(ea.getId()), ea.getName(), ea.getDecription(), ea.getAuthor());
+                    curr.setPosition(ea.getPosition());
+                    curr.setTime(ea.getTime());
+                    curr.setKind(ea.getKind());
+                    curr.setDate(ea.getDate());
+                    curr.setImage(ea.getImage());
+                    curr.setAddress(ea.getAddress());
+                    curr.setArrayThings(ea.getArrayThings());
                     result.add(curr);
                     //  System.out.println(result.size());
                 }
@@ -312,8 +359,12 @@ public class GreetingController {
         EventApp evapp = eventRepository.findById(Id).get();
         result = new Event(id, evapp.getName(), evapp.getDecription(), evapp.getAuthor());
         result.setImage(evapp.getImage());
-
-        result.setPlace(evapp.getPlace());
+        result.setArrayThings(evapp.getArrayThings());
+        result.setAddress(evapp.getAddress());
+        result.setDate(evapp.getDate());
+        result.setKind(evapp.getKind());
+        result.setTime(evapp.getTime());
+        result.setPosition(evapp.getPosition());
         return result;
     }
 
@@ -344,6 +395,68 @@ public class GreetingController {
             userRepository.save(u);
         }
         eventRepository.deleteById(Id);
+    }
+
+
+    @GetMapping(path = "/userByEmail")
+    public @ResponseBody
+    User userByEmail(@RequestParam String email) {
+        User user = new User();
+        for (UserApp u : userRepository.findAll()) {
+            if (u.getEmail().equals(email)) {
+                user.setImage(u.getImage());
+                user.setId(Long.toString(u.getId()));
+                user.setEmail(u.getEmail());
+                user.setPassword(u.getPassword());
+                user.setCity(u.getCity());
+                user.setAge(u.getAge());
+                user.setName(u.getmName());
+                return user;
+            }
+        }
+        return null;
+    }
+
+
+    @GetMapping(path = "/changeThingById")
+    public @ResponseBody
+    void changeThingById(@RequestParam String Id, @RequestParam Integer number) {
+        //  Event event = new Event();
+        EventApp evapp = eventRepository.findById(Long.valueOf(Id)).get();
+        ArrayThings arrthings = evapp.getThings();
+        ArrayList<Thing> arr = arrthings.getArr();
+        if (arr.get(number).getValue())
+            arr.get(number).setValue(false);
+        else
+            arr.get(number).setValue(true);
+        arrthings.setArr(arr);
+        evapp.setThings(arrthings);
+        eventRepository.save(evapp);
+        template.convertAndSend("/topic/greeting" + Id, "2");
+    }
+
+    @GetMapping(path = "/thingsOfEvent")
+    public @ResponseBody
+    ArrayThings thingsOfEvent(@RequestParam String Id) {
+        //  Event event = new Event();
+        EventApp evapp = eventRepository.findById(Long.valueOf(Id)).get();
+        return evapp.getThings();
+    }
+
+
+    @GetMapping(path = "/addThings")
+    public @ResponseBody
+    void addThings(@RequestParam String Id, @RequestParam String name) {
+        MessageApp message = new MessageApp("###");
+
+        EventApp evapp = eventRepository.findById(Long.valueOf(Id)).get();
+        ArrayThings arrthings = evapp.getThings();
+        ArrayList<Thing> arr = arrthings.getArr();
+        arr.add(new Thing(name));
+        arrthings.setArr(arr);
+        evapp.setThings(arrthings);
+        eventRepository.save(evapp);
+        template.convertAndSend("/topic/greeting" + Id, "2");
     }
 
 

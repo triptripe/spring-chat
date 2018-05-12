@@ -38,7 +38,7 @@ public class handler2 extends StompSessionHandlerAdapter {
 //заглушка на в
         System.out.println("Подписался на " + testId);
         session.subscribe("/topic/greeting" + testId, this);
-        session.subscribe("/topic/greeting/eventUpdate", new StompSessionHandlerAdapter() {
+  /*      session.subscribe("/topic/greeting/eventUpdate", new StompSessionHandlerAdapter() {
             @Override
             public void handleException(StompSession session, StompCommand command, StompHeaders headers, byte[] payload, Throwable exception) {
                 exception.printStackTrace();
@@ -54,14 +54,14 @@ public class handler2 extends StompSessionHandlerAdapter {
                 try {
                     OutputStream sout = socket.getOutputStream();
                     DataOutputStream out = new DataOutputStream(sout);
-                    out.writeUTF("Пацаны обновились");
+                    out.writeUTF("2");
                     out.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 Commands.update();
             }
-        });
+        });*/
         // session.subscribe("/topic/greeting" + 48, this);
         System.out.println("New session: " + session.getSessionId());
 
@@ -83,11 +83,12 @@ public class handler2 extends StompSessionHandlerAdapter {
 
     @Override
     public void handleFrame(StompHeaders headers, Object payload) {
+        System.out.println("size listeners: " + listeners.size());
         for (SessionListener listener : listeners) {
             try {
                 listener.gotMessage((MessageApp) payload);
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }
     }
@@ -102,6 +103,7 @@ public class handler2 extends StompSessionHandlerAdapter {
 
     public void disconnect() {
         session.disconnect();
+
         for (SessionListener listener : listeners) {
             listener.wasDisconnected();
         }

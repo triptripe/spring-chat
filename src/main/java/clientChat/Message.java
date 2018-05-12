@@ -6,19 +6,19 @@ package clientChat;
 
 public class Message {
 
-    private Long id;
+    private Long date;
     private String from;
     private String message;
-    
-    Message() {
+
+    public Message() {
     }
 
-    public Long getId() {
-        return id;
+    public Long getDate() {
+        return date;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setDate(Long date) {
+        this.date = date;
     }
 
     public String getFrom() {

@@ -24,15 +24,27 @@ public class Reciever implements handler2.SessionListener {
     @Override
     public void gotMessage(MessageApp message) {
         try {
+            if (message == null) {
+                System.out.println("null");
+                return;
+            }
+
             OutputStream sout = socket.getOutputStream();
             DataOutputStream out = new DataOutputStream(sout);
-            out.writeUTF(message.getEmailSender() + " " + message.getContent());
+            System.out.println("check");
+            String outString;
+            if (message.getContent().equals("###")) {
+                outString = "2";
+            } else
+                outString = "1" + " " + message.getEmailSender() + " " + message.getDate() + " " + message.getContent() + " ";
+            System.out.println(outString);
+            out.writeUTF(outString);
             out.flush();
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
 
-        System.out.println(message.getContent());
+        //  System.out.println(message.getContent());
     }
 
     @Override
